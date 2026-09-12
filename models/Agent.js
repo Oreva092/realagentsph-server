@@ -1,0 +1,69 @@
+import mongoose from "mongoose";
+
+const agentSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, "Full name is required"],
+            trim: true,
+            maxlength: [80, "Name is too long"]
+        },
+        whatsapp: {
+            type: String,
+            required: [true, "WhatsApp number is required"],
+            trim: true,
+            unique: true,
+            match: [/^\+?[0-9]{10,15}$/, "Enter a valid phone number"],
+        },
+        area: {
+            type: String,
+            required: [true, "Area is required"],
+            trim: true
+        },
+        minBudget: {
+            type: Number,
+            required: [true, "Minimum budget is required"],
+            min: [0, "Budget cannot be negative"]
+        },
+        maxBudget: {
+            type: Number,
+            required: [true, "Maximum budget is required"],
+            validate: {
+                validator: function (value){
+                    return value >= this.minBudget;
+                },
+                message: "Maximum budget must be greater than or equal to minimum budget"
+            }
+        },
+        type: {
+            type: [String],
+            required: [true, "At least one property type is required"],
+            validate: {
+                validator: (arr) => Array.isArray(arr) && arr.length > 0,
+                message: "At least one property type must be selected"
+            }
+        },
+        photo: {
+            type: String,
+            required: [true, "A photo is required"]
+        },
+        verified: {
+            type: Boolean,
+            default: false
+        },
+        rating: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: null
+        }
+    },
+    { timestamps: true }
+);
+
+agentSchema.index({ area: 1 });
+agentSchema.index({ verified: 1 });
+
+const Agent = mongoose.model("Agent", agentSchema);
+
+export default Agent;
