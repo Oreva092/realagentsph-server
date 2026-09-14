@@ -62,7 +62,11 @@ const agentSchema = new mongoose.Schema(
             default: 0
         }
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+        toJSON: { virtuals: true }
+    }
+
 );
 
 agentSchema.index({ area: 1 });

@@ -31,3 +31,23 @@ export async function getAgents(req, res) {
         res.status(500).json({ message: "Could not fetch agents. Please try again." });
     }
 }
+
+
+export async function getAgentById(req, res) {
+    try {
+        const agent = await Agent.findById(req.params.id);
+
+        if (!agent) {
+            return res.status(404).json({ message: "Agent not found" });
+        }
+
+        res.status(200).json(agent);
+    } catch (error) {
+        // CastError happens when the id in the URL isn't a valid MongoDB ObjectId shape
+        if (error.name === "CastError") {
+            return res.status(404).json({ message: "Agent not found" });
+        }
+        console.error("Fetch agent by id error:", error);
+        res.status(500).json({ message: "Could not fetch agent. Please try again." });
+    }
+}

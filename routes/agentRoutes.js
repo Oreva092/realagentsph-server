@@ -1,6 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { registerAgent, getAgents } from "../controllers/agentController.js";
+import { registerAgent, getAgents, getAgentById } from "../controllers/agentController.js";
 
 const router = express.Router();
 
@@ -15,5 +15,6 @@ const registerLimiter = rateLimit({
 
 router.post("/", registerLimiter, registerAgent);
 router.get("/", getAgents);
+router.get("/:id", getAgentById);
 
 export default router;
