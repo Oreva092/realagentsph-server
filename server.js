@@ -6,6 +6,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 import agentRoutes from "./routes/agentRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.use("/api/agents", agentRoutes);
+app.use("/api/auth", authRoutes)
 
 // 404 handler - anything that doesn't match a route above
 app.use((req, res) => {

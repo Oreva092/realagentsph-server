@@ -51,3 +51,50 @@ export async function getAgentById(req, res) {
         res.status(500).json({ message: "Could not fetch agent. Please try again." });
     }
 }
+
+
+
+
+export async function updateAgent(req, res){
+    try {
+        const allowed = {};
+        if (typeof req.body.verified === "boolean") allowed.verified = req.body.verified;
+        if(req.body.rating !== undefined) allowed.rating = re.body.rating;
+
+        const agent = await Agent.findByIdAndUpdate(req.params.id, allowed, {
+            new: true,
+            runValidators: true
+        });
+
+        if(!agent){
+            return res.status(404).json({ message: "Agent not found" });
+        }
+
+        res.status(200).json(agent);
+    } catch (error){
+        if(error.name === "CastError"){
+            return res.status(404).json({ message: "Agent not found" });
+        }
+        console.error("Update agent error:", error);
+        res.status(500).json({ message: "Could not update agent." });
+    }
+}
+
+
+export async function deleteAgent(req, res){
+    try {
+        const agent = await Agent.findByIdAndDelete(req.params.id);
+
+        if(!agent){
+            return res.status(404).json({ message: "Agent not found" });
+        }
+
+        res.status(200).json({ message: "Agent removed" });
+    } catch (error){
+        if(error.name === "CastError"){
+            return res.status(404).json({ message: "Agent not found" });
+        }
+        console.error("Delete agent error:", error);
+        res.status(500).json({ message: "Could not remove agent" });
+    }
+}
