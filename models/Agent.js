@@ -13,27 +13,12 @@ const agentSchema = new mongoose.Schema(
             required: [true, "WhatsApp number is required"],
             trim: true,
             unique: true,
-            match: [/^\+?[0-9]{10,15}$/, "Enter a valid phone number"],
+            match: [/^\+?[0-9]{10,15}$/, "Enter a valid phone number"]
         },
         area: {
             type: String,
             required: [true, "Area is required"],
             trim: true
-        },
-        minBudget: {
-            type: Number,
-            required: [true, "Minimum budget is required"],
-            min: [0, "Budget cannot be negative"]
-        },
-        maxBudget: {
-            type: Number,
-            required: [true, "Maximum budget is required"],
-            validate: {
-                validator: function (value){
-                    return value >= this.minBudget;
-                },
-                message: "Maximum budget must be greater than or equal to minimum budget"
-            }
         },
         type: {
             type: [String],
@@ -66,7 +51,6 @@ const agentSchema = new mongoose.Schema(
         timestamps: true,
         toJSON: { virtuals: true }
     }
-
 );
 
 agentSchema.index({ area: 1 });
