@@ -32,6 +32,14 @@ const agentSchema = new mongoose.Schema(
             type: String,
             required: [true, "A photo is required"]
         },
+        status: {
+            type: String,
+            enum: {
+                values: ["pending", "approved", "rejected"],
+                message: "Status must be pending, approved, or rejected"
+            },
+            default: "pending"
+        },
         verified: {
             type: Boolean,
             default: false
@@ -55,6 +63,7 @@ const agentSchema = new mongoose.Schema(
 
 agentSchema.index({ area: 1 });
 agentSchema.index({ verified: 1 });
+agentSchema.index({ status: 1 });
 
 const Agent = mongoose.model("Agent", agentSchema);
 

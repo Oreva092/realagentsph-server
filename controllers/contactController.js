@@ -1,16 +1,6 @@
 // server/controllers/contactController.js
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_PORT === "465", // true only for port 465
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
 function escapeHtml(str) {
   return str
     .replace(/&/g, "&amp;")
@@ -25,10 +15,27 @@ export async function sendContactMessage(req, res) {
     return res.status(400).json({ message: "Name, email and message are required." });
   }
 
+  // Quick sanity check while you're debugging — remove once it's confirmed working
+  console.log("SMTP config check:", {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER,
+  });
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_PORT === "465",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
   try {
     await transporter.sendMail({
       from: `"RAP Contact Form" <${process.env.SMTP_USER}>`,
-      to: "hello@realagentsph.com",
+      to: "your-personal-email@gmail.com", // swap back to hello@realagentsph.com once that mailbox exists
       replyTo: email,
       subject: `New contact form message from ${name}`,
       text: message,

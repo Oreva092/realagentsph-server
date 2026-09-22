@@ -1,6 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { registerAgent, getAgents, getAgentById, updateAgent, deleteAgent } from "../controllers/agentController.js";
+import { registerAgent, getPublicAgents, getAllAgentsAdmin, getAgentById, updateAgent, deleteAgent } from "../controllers/agentController.js";
 import { protect } from "../middleware/protect.js";
 
 const router = express.Router();
@@ -12,7 +12,8 @@ const registerLimiter = rateLimit({
 });
 
 router.post("/", registerLimiter, registerAgent);
-router.get("/", getAgents);
+router.get("/", getPublicAgents);
+router.get("/admin", protect, getAllAgentsAdmin);
 router.get("/:id", getAgentById);
 router.put("/:id", protect, updateAgent);
 router.delete("/:id", protect, deleteAgent);
