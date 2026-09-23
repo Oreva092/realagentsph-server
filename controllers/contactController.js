@@ -35,7 +35,7 @@ export async function sendContactMessage(req, res) {
   try {
     await transporter.sendMail({
       from: `"RAP Contact Form" <${process.env.SMTP_USER}>`,
-      to: "your-personal-email@gmail.com", // swap back to hello@realagentsph.com once that mailbox exists
+      to: "realagentsph.admin@gmail.com", // swap back to hello@realagentsph.com once that mailbox exists
       replyTo: email,
       subject: `New contact form message from ${name}`,
       text: message,
