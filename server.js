@@ -13,8 +13,22 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL }));
+
+const allowedOrigins = (process.env.CLIENT_URL || "").split(",").map((url) => url.trim());
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    }
+}));
+
 app.use(express.json());
 
 if(process.env.NODE_ENV !== "production"){

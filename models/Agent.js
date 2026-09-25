@@ -1,5 +1,22 @@
 import mongoose from "mongoose";
 
+
+function normalizeWhatsapp(value) {
+    if (!value) return value;
+    let digits = value.replace(/\D/g, "");
+
+    if (digits.startsWith("0")) {
+        digits = "234" + digits.slice(1);
+    } else if (!digits.startsWith("234") && digits.length === 10) {
+        digits = "234" + digits;
+    }
+
+    return digits;
+}
+
+
+
+
 const agentSchema = new mongoose.Schema(
     {
         name: {
@@ -13,6 +30,7 @@ const agentSchema = new mongoose.Schema(
             required: [true, "WhatsApp number is required"],
             trim: true,
             unique: true,
+            set: normalizeWhatsapp,
             match: [/^\+?[0-9]{10,15}$/, "Enter a valid phone number"]
         },
         area: {

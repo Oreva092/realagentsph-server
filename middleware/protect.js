@@ -21,6 +21,9 @@ export async function protect(req, res, next){
         req.admin = admin;
         next();
     } catch (error){
-        return res.status(401).json({ message: "Session expired. Please log in again." })
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({ message: "Session expired. Please log in again." });
+        }
+        return res.status(401).json({ message: "Not authorized." });
     }
 }
