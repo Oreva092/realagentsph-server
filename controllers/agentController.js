@@ -133,3 +133,20 @@ export async function deleteAgent(req, res){
         res.status(500).json({ message: "Could not remove agent" });
     }
 }
+
+
+
+// function for agent stats
+export async function getAgentStats(req, res){
+    try{
+        const [approvedCount, verifiedCount] = await Promise.all([
+            Agent.countDocuments({ status: "approved" }),
+            Agent.countDocuments({ status: "approved", verified: true })
+        ]);
+
+        res.status(200).json({ approvedCount, verifiedCount });
+    } catch (error){
+        console.error("Fetch agent stats error:", error);
+        res.status(500).json({ message: "Could not fetch stats" });
+    }
+}
