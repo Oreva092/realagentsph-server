@@ -4,13 +4,11 @@ import { escapeHtml } from "../utils/escapeHtml.js";
 
 export async function registerAgent(req, res) {
     try {
-        const agent = await Agent.create(req.body);
+        const { name, whatsapp, area, type, photo } = req.body;
+        const agent = await Agent.create({ name, whatsapp, area, type, photo });
 
         // Notify the admin — a failed email should never block the agent's registration itself
         try {
-            const { name, whatsapp, area, type, photo } = req.body;
-            const agent = await Agent.create({ name, whatsapp, area, type, photo });
-
             const whatsappLink = `https://wa.me/${agent.whatsapp.replace(/\D/g, "")}`;
             await sendEmail({
                 to: process.env.ADMIN_NOTIFY_EMAIL,
