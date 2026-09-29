@@ -21,7 +21,8 @@ const adminSchema = new mongoose.Schema(
             minlength: [8, "Password must be at least 8 characters long"],
         },
         resetPasswordToken: String,
-        resetPasswordExpires: Date
+        resetPasswordExpires: Date,
+        passwordChangedAt: Date,
     },
     { timestamps: true }
 );

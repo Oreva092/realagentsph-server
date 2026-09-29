@@ -49,35 +49,40 @@ export async function forgotPassword(req, res) {
     try {
         const admin = await Admin.findOne({ email: email.toLowerCase().trim() });
 
-        if (!admin) {
-            return res.status(200).json(genericResponse);
+        if (admin) {
+            const rawToken = crypto.randomBytes(32).toString("hex");
+
+            // Only the hash is stored, so a database leak doesn't hand out working reset links
+            admin.resetPasswordToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+            admin.resetPasswordExpires = Date.now() + 30 * 60 * 1000;
+            await admin.save();
+
+            const baseUrl = (process.env.FRONTEND_URL || "").replace(/\/+$/, "");
+            const resetUrl = `${baseUrl}/admin/reset-password/${rawToken}`;
+
+            // Email failure is caught separately: a 500 here would reveal that the account exists.
+            // The error is still logged so a broken mailbox shows up in the server logs.
+            try {
+                await sendEmail({
+                    to: admin.email,
+                    subject: "Reset your RealAgents PH admin password",
+                    text: `Hi ${admin.name},\n\nUse this link to reset your password (valid for 30 minutes):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`,
+                    html: `
+                        <p>Hi ${escapeHtml(admin.name)},</p>
+                        <p>Use the link below to reset your admin password. It's valid for 30 minutes.</p>
+                        <p><a href="${resetUrl}">Reset my password</a></p>
+                        <p>If you didn't request this, you can ignore this email.</p>
+                    `,
+                });
+            } catch (mailError) {
+                console.error("Reset email failed to send:", mailError);
+            }
         }
 
-        const rawToken = crypto.randomBytes(32).toString("hex");
-
-        // Only the hash is stored, so a database leak doesn't hand out working reset links
-        admin.resetPasswordToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-        admin.resetPasswordExpires = Date.now() + 30 * 60 * 1000;
-        await admin.save();
-
-        const resetUrl = `${process.env.FRONTEND_URL}/admin/reset-password/${rawToken}`;
-
-        await sendEmail({
-            to: admin.email,
-            subject: "Reset your RealAgents PH admin password",
-            text: `Hi ${admin.name},\n\nUse this link to reset your password (valid for 30 minutes):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`,
-            html: `
-                <p>Hi ${escapeHtml(admin.name)},</p>
-                <p>Use the link below to reset your admin password. It's valid for 30 minutes.</p>
-                <p><a href="${resetUrl}">Reset my password</a></p>
-                <p>If you didn't request this, you can ignore this email.</p>
-            `,
-        });
-
-        res.status(200).json(genericResponse);
+        return res.status(200).json(genericResponse);
     } catch (error) {
         console.error("Forgot password error:", error);
-        res.status(500).json({ message: "Could not process your request. Please try again." });
+        return res.status(500).json({ message: "Could not process your request. Please try again." });
     }
 }
 
@@ -102,6 +107,7 @@ export async function resetPassword(req, res) {
         admin.password = password;
         admin.resetPasswordToken = undefined;
         admin.resetPasswordExpires = undefined;
+        admin.passwordChangedAt = new Date();
         await admin.save();
 
         res.status(200).json({ message: "Password updated. You can now log in." });
