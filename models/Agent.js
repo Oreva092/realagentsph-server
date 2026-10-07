@@ -1,22 +1,7 @@
+// models/Agent.js  (updated: shared normalizer + deleting an agent deletes their reviews)
 import mongoose from "mongoose";
-
-function normalizeWhatsapp(value) {
-    // Non-strings pass through untouched so Mongoose reports a normal validation error
-    if (typeof value !== "string" || !value) return value;
-
-    let digits = value.replace(/\D/g, "");
-
-    if (digits.startsWith("2340")) {
-        // "+234 0904..." typed with the local zero still in place
-        digits = "234" + digits.slice(4);
-    } else if (digits.startsWith("0")) {
-        digits = "234" + digits.slice(1);
-    } else if (!digits.startsWith("234") && digits.length === 10) {
-        digits = "234" + digits;
-    }
-
-    return digits;
-}
+import { normalizeWhatsapp } from "../utils/normalizeWhatsapp.js";
+import Review from "./Review.js";
 
 // Accepts only https Cloudinary image URLs from our own cloud.
 // Parsing with URL (instead of checking a string prefix) resolves tricks like "/../" before we compare.
@@ -110,6 +95,14 @@ const agentSchema = new mongoose.Schema(
 agentSchema.index({ area: 1 });
 agentSchema.index({ verified: 1 });
 agentSchema.index({ status: 1 });
+
+// When an agent is deleted, their reviews go with them
+agentSchema.post("findOneAndDelete", async function (doc) {
+    if (doc) await Review.deleteMany({ agent: doc._id });
+});
+agentSchema.post("deleteOne", { document: true, query: false }, async function () {
+    await Review.deleteMany({ agent: this._id });
+});
 
 const Agent = mongoose.model("Agent", agentSchema);
 

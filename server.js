@@ -1,3 +1,4 @@
+// server.js  (updated: reviews route added)
 import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
@@ -8,6 +9,7 @@ import morgan from "morgan";
 import agentRoutes from "./routes/agentRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 // Fail fast: a server that boots without these fails in confusing ways later
 const requiredEnv = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL"];
@@ -66,6 +68,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/agents", agentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Anything that doesn't match a route above
 app.use((req, res) => {
