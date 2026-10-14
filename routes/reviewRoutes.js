@@ -1,4 +1,3 @@
-// routes/reviewRoutes.js  (new)
 import express from "express";
 import rateLimit from "express-rate-limit";
 import {
